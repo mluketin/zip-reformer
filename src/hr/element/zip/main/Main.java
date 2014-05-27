@@ -1,6 +1,6 @@
 package hr.element.zip.main;
 import hr.element.zip.reader.ZipReader;
-import hr.element.zip.wirter.ZipWriter;
+import hr.element.zip.writer.ZipWriter;
 
 import java.io.File;
 import java.io.FileInputStream;
