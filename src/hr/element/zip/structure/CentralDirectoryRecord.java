@@ -1,12 +1,27 @@
 package hr.element.zip.structure;
-import hr.element.zip.tools.ZipFile;
+import hr.element.zip.ByteBlock;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 
-public class CentralDirectoryRecord extends ZipFile {
+public class CentralDirectoryRecord extends ByteBlock {
 	
 	private LocalFileRecord lfr;
+	private ZipEntry ze; //sluzi za SHA2 hash 
+	private ZipFile zf;	//sluzi za SHA2 hash 
+	byte[] sha256Hash;
 	
 	// OFFSETS
+	
+	private static final int COMPRESSION_STORED = 0;
+	private static final int COMPRESSION_DEFLATED = 8;
+	
 	private static final int OFF_CompressionMethod  = 10;
 	private static final int OFF_CRC32              = 16;
 	private static final int OFF_CompressedSize     = 20; 
@@ -22,6 +37,19 @@ public class CentralDirectoryRecord extends ZipFile {
 	  // END OFFSETS
 
 
+	public CentralDirectoryRecord(final byte[] centralBody, final byte[] localBody){
+		super(centralBody);
+		
+		this.lfr = new LocalFileRecord(localBody);
+		
+	}
+	
+	public CentralDirectoryRecord(final byte[] centralBody){
+		super(centralBody);
+		
+		this.lfr = null;
+	}
+	
 	public CentralDirectoryRecord(final byte[] body, final int offset) {
 	    super(body, offset);
 	    
@@ -84,6 +112,10 @@ public class CentralDirectoryRecord extends ZipFile {
 	  public LocalFileRecord getLocalFileRecord() {
 		  return this.lfr;
 	  }
+	  
+	  public void setLocalFileRecord(LocalFileRecord lfr) {
+		this.lfr = lfr;  
+	  }
 
 	  @Override
 	  public String toString() {
@@ -91,12 +123,77 @@ public class CentralDirectoryRecord extends ZipFile {
 	  }
 	  
 	  public byte[] toByteArray() {
-			 byte[] b = new byte[this.getLength()];
-			 for(int i = 0; i < getLength(); i++){
+		  	
+		  	 int len = this.getLength();
+		  
+			 byte[] b = new byte[len];
+			 for(int i = 0; i < len; i++){
 				 b[i] = body[i+offset];
 			 }
 				 
 			return b;
 	  }
+	
+	  public void updateLocRecOff(int off) {
+		setLocalFileHeaderOffset(off);
+	}
+	  
+	public void setHash(ZipFile zf) throws NoSuchAlgorithmException, IOException {
+		setZipEntry(zf);
+		this.sha256Hash = getSha256();
+			
+	}
+	  
+	public void setZipEntry(ZipFile zf) {
+		this.zf = zf;
+		this.ze = zf.getEntry(this.getFileName());
+	}
+	
+	private byte[] getSha256() throws NoSuchAlgorithmException, IOException{
+		
+		byte[] buffer = null;
+		
+		if(getCompressionMethod() == COMPRESSION_STORED ){
+			buffer = getLocalFileRecord().getCompressedDataObject().getBytes();
+			
+		} else if(getCompressionMethod() == COMPRESSION_DEFLATED ) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			InputStream in = zf.getInputStream(ze);
+			for (int c = in.read(); c != -1; c = in.read()) {
+		        baos.write(c);
+		    }
+		      
+			buffer = baos.toByteArray();	//ovaj buffer sadrzi byte array uncompressed filea
+			baos.close();
+		}
+				
+		MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+		  
+		byte[] hash = sha256.digest(buffer);
+		return hash;
+		
+	}
+	
+	public boolean compareSha(CentralDirectoryRecord cdr) throws NoSuchAlgorithmException, IOException{
+//		byte[] hash1 = this.getSha256();
+//		byte[] hash2 = cdr.getSha256();
+//		
+//		for (int i = 0; i < hash1.length; i++) {
+//			if(hash1[i] != hash2[i]){
+//				return false;
+//			}
+//		}
+		
+		for (int i = 0; i < this.sha256Hash.length; i++) {
+			if(this.sha256Hash[i] != cdr.sha256Hash[i]){
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
+	
+	
 	  
 }

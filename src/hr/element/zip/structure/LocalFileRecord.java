@@ -1,8 +1,8 @@
 package hr.element.zip.structure;
-import hr.element.zip.tools.ZipFile;
+import hr.element.zip.ByteBlock;
 
 
-public class LocalFileRecord extends ZipFile {
+public class LocalFileRecord extends ByteBlock {
   public static final byte[] HeaderSignature = { 0x50, 0x4b, 0x03, 0x04 };
 
   // OFFSETS
@@ -20,6 +20,11 @@ public class LocalFileRecord extends ZipFile {
 
   // LENGHTS
 
+  
+  public LocalFileRecord(final byte[] body){
+	  super(body);
+  }
+  
   public LocalFileRecord(final byte[] body, final int offset) {
     super(body, offset);
   }

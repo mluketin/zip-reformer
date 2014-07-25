@@ -1,11 +1,9 @@
 package hr.element.zip.structure;
-import hr.element.zip.tools.ZipFile;
+import hr.element.zip.ByteBlock;
 
 
 
-
-
-public class LocalFileRecordExt extends ZipFile {
+public class LocalFileRecordExt extends ByteBlock {
 
   public static final byte[] HeaderSignature = { 0x50, 0x4b, 0x07, 0x08 }; // Optional
 

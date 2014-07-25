@@ -1,9 +1,10 @@
 package hr.element.zip.structure;
-import hr.element.zip.tools.ZipFile;
+import hr.element.zip.ByteBlock;
 
 
-public class EndOfCentralDirectory extends ZipFile{
+public class EndOfCentralDirectory extends ByteBlock{
 	
+	private static final int OFF_NumberOfDiskEntrys       			     =  8;
 	private static final int OFF_NumberOfCentralDirectoryEntrys          = 10;
 	private static final int OFF_CentralDirectory_Size					 = 12;
 	private static final int OFF_CentralDirectory_Start                  = 16;	//offset od pocetka archivea
@@ -11,14 +12,37 @@ public class EndOfCentralDirectory extends ZipFile{
 	private static final int OFF_Comment                                 = 22;
 	
 	
+	public EndOfCentralDirectory(){
+		byte[] newBody = new byte[22];
+		newBody[0] = 0x50;
+		newBody[1] = 0x4b;
+		newBody[2] = 0x05;
+		newBody[3] = 0x06;
+		
+		for (int i = 4; i < newBody.length; i++) {
+			newBody[i] = 0;
+		}
+		
+		setBody(newBody);
+	}
+	
+	public EndOfCentralDirectory(final byte[] body) {
+		super(body);			
+	}
+	
 	public EndOfCentralDirectory(final byte[] body, final int offset) {
 		super(body, offset);			
+	}
+	
+	public int getDiskNumberOfEntrys() {
+	    return getShort(OFF_NumberOfDiskEntrys);	
 	}
 	
 	public int getCentralDirectoryNumberOfEntrys() {
 	    return getShort(OFF_NumberOfCentralDirectoryEntrys);	
 	}
 	
+	//velicina CD-a ne ukljucuje EndOfCd
 	public int getCentralDirectoryLength() {
 		    return getInt(OFF_CentralDirectory_Size);
 	}
@@ -38,25 +62,65 @@ public class EndOfCentralDirectory extends ZipFile{
 		    return getShort(OFF_Comment_Length);
 	}
 	
+	public String getComment() {
+	    return getString(OFF_Comment, getCommentLength());
+	  }
+	
+	
+	public void setDiskNumberOfCd(int number){
+		setShort(OFF_NumberOfDiskEntrys, number);
+	}
+	
 	public void setNumberOfCd(int number){
-		setInt(OFF_NumberOfCentralDirectoryEntrys, number);
+		setShort(OFF_NumberOfCentralDirectoryEntrys, number);
 	}
 	
 	public void setCentralDirectoryStartOffset(int number){
 		setInt(OFF_CentralDirectory_Start, number);
 	}
 	
-	public void setLengthAllCD(int number){
+	public void setCentralDirectorySize(int number){
 		setInt(OFF_CentralDirectory_Size, number);
 	}
 	
 	public byte[] toByteArray() {
-		 byte[] b = new byte[this.getLength()];
-		 for(int i = 0; i < getLength(); i++){
+			
+		 int len = this.getLength();
+		
+		 byte[] b = new byte[len];
+		 for(int i = 0; i < len; i++){
 			 b[i] = body[i+offset];
 		 }
 			 
 		return b;
-	  }
+	}
 
+	//i, adds i to number of entries on disk and number of entries in central directory
+	//cdLength is length of central directory record
+	//locLength is length of local record 
+	public void update(int i, int cdLength, int locLength) {
+		
+		if(i != 0) {
+			setDiskNumberOfCd(getDiskNumberOfEntrys() + i);
+			setNumberOfCd(getCentralDirectoryNumberOfEntrys() + i);
+		}
+		
+		if(cdLength != 0) {
+			setCentralDirectorySize(getCentralDirectoryLength() +  cdLength);
+		}
+		
+		if(locLength != 0) {
+			setCentralDirectoryStartOffset(getCentralDirectoryStartOffset() + locLength);	
+		}
+	}
+
+	
+	public void set(int i, int cdLength, int locLength) {
+		setDiskNumberOfCd(i);
+		setNumberOfCd(i);
+		setCentralDirectorySize(cdLength);
+		setCentralDirectoryStartOffset(locLength);	
+
+	}
+	
 }

@@ -1,10 +1,9 @@
 package hr.element.zip.structure;
-import hr.element.zip.tools.ByteArrayTool;
 
 
 
 
-public class CompressedData  {
+public class CompressedData {
 
   public final byte[] Data;
   public final int Method;
@@ -14,12 +13,6 @@ public class CompressedData  {
     this.Data = body;
     this.Method = method;
     this.CRC32 = CRC32;
-  }
-
-  public CompressedData(final byte[] body, final int method) {
-    this.Data = body;
-    this.Method = method;
-    this.CRC32 = ByteArrayTool.computeCRC32(body, 0, body.length);
   }
 
 
