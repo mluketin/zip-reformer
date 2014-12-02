@@ -9,7 +9,7 @@ import java.util.Arrays;
  
 public class ByteBlock {
 	
-	public byte[] body;
+	protected byte[] body;
 	private int index;
 	protected int offset;
 	private int length;

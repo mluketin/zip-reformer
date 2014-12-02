@@ -11,7 +11,9 @@ public class EndOfCentralDirectory extends ByteBlock{
 	private static final int OFF_Comment_Length                          = 20;
 	private static final int OFF_Comment                                 = 22;
 	
-	
+	/**
+	 * creates empty end of central directory, first 4bytes are marker, everything else is set to 0
+	 */
 	public EndOfCentralDirectory(){
 		byte[] newBody = new byte[22];
 		newBody[0] = 0x50;
@@ -114,7 +116,12 @@ public class EndOfCentralDirectory extends ByteBlock{
 		}
 	}
 
-	
+	/**
+	 * 
+	 * @param i number of records
+	 * @param cdLength size of central directory
+	 * @param locLength size of local directory (so offset to CD can be set =>  locLength+1)
+	 */
 	public void set(int i, int cdLength, int locLength) {
 		setDiskNumberOfCd(i);
 		setNumberOfCd(i);

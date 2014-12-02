@@ -25,7 +25,7 @@ public class ZipReader extends ByteBlock implements ArchiverI{
 						//bitno je samo da svakom centralDirectoryRecordu pridodam njegov zipEntry koji je spojen sa originalnim zipFileom kako bi se moglo procitati
 	
 	/**
-	 * Creates empty archive with only EndOfCentralDirectory
+	 * Creates empty archive with only EndOfCentralDirectory ((22bytes))
 	 */
 	public ZipReader() {
 		endOfCdRecord = new EndOfCentralDirectory();
@@ -33,10 +33,8 @@ public class ZipReader extends ByteBlock implements ArchiverI{
 	};
 	
 
-	
-	
 	/**
-	 * Creates ZipReader from file on disk using pathname in argument
+	 * Creates ZipReader from zip file on disk using pathname in argument
 	 * @param pathname
 	 * @throws IOException
 	 * @throws NoSuchAlgorithmException 
@@ -56,7 +54,12 @@ public class ZipReader extends ByteBlock implements ArchiverI{
 		process(body);	
 	}
 	
-
+	/**
+	 * Metoda pronade end of central directory i kreira listu centralnih direktorija
+	 * @param body body od zipa koji je na disku
+	 * @throws NoSuchAlgorithmException
+	 * @throws IOException
+	 */
 	private void process(final byte[] body) throws NoSuchAlgorithmException, IOException {
 		int offsetEndOfCd = findEndOfCd();
 		
@@ -71,14 +74,21 @@ public class ZipReader extends ByteBlock implements ArchiverI{
 	}
 
 
-	//ovdje se central directory spreme u listu koju metoda vrati (lista sadrzava central direktorije)
+	/**
+	 * Metoda vrati listu centralnih direktorija u arhivi
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws IOException
+	 */
 	private List<CentralDirectoryRecord> getCentralDirectoryEntries() throws NoSuchAlgorithmException, IOException {
 		List<CentralDirectoryRecord> listOfCdEntries = new ArrayList<>();
 	
 		for(int i = this.endOfCdRecord.getCentralDirectoryStartOffset(); i < this.endOfCdRecord.getOffset();) {
 			if(IsCentralDirectory(this.body, i)){
-				CentralDirectoryRecord cdr = new CentralDirectoryRecord(this.body, i);
-				cdr.setHash(zf);	//
+//				CentralDirectoryRecord cdr = new CentralDirectoryRecord(this.body, i);
+				CentralDirectoryRecord cdr = new CentralDirectoryRecord(this.body, i, zf);
+
+//				cdr.setHash(zf);	//____________________________::::::
 				listOfCdEntries.add(cdr);
 				i = i + cdr.getLength();
 				
@@ -121,11 +131,18 @@ public class ZipReader extends ByteBlock implements ArchiverI{
 		return listOfCdEntries;
 	}
 	
-	public int sizeOfArchiveInBytes(){
+	public int length(){
 		return endOfCdRecord.getCentralDirectoryStartOffset() + endOfCdRecord.getCentralDirectoryLength() + endOfCdRecord.getLength();
 	}
 	
-
+	
+	
+	
+	//**************************************************************************//
+	//**************************************************************************//
+	//**************************************************************************//
+	//**************************************************************************//
+	
 	@Override
 	public void join(ArchiverI zipArch) {
 		
@@ -176,15 +193,18 @@ public class ZipReader extends ByteBlock implements ArchiverI{
 	
 	/**
 	 * compare and add
+	 * trenutni problem: ako se dodaje CDR koji ima isto ime ka neki file u arhivi
 	 */
 	@Override
 	public void addRecord(CentralDirectoryRecord rec) throws NoSuchAlgorithmException, IOException {
 		
+		//KREIRATI NOVU LISTU CDR I U NJU STAVLJATI CDR-ove KOJI SU PREGLEDANI I USPOREÐENI; PROBLEM KOD IMENA??
+		
 		//kreiram novi cdr koji cu staviti u ZipReader 
-		CentralDirectoryRecord cdr = new CentralDirectoryRecord(rec.toByteArray(), rec.getLocalFileRecord().toByteArray());
-		
-		listOfCdEntries.add(cdr);
-		
+		CentralDirectoryRecord cdr = new CentralDirectoryRecord(rec.toByteArray(), 
+																rec.getLocalFileRecord().toByteArray(), 
+																rec.getHashObject()
+																);		
 		CentralDirectoryRecord record;
 		
 		
@@ -197,8 +217,10 @@ public class ZipReader extends ByteBlock implements ArchiverI{
 					flag = false;
 					
 					if( (record.getLength()+record.getLocalFileRecord().getLength()) > (cdr.getLength()+cdr.getLocalFileRecord().getLength())  ){
-						listOfCdEntries.add(cdr);
+//						listOfCdEntries.add(cdr);
+						
 						listOfCdEntries.remove(record);
+						listOfCdEntries.add(i, cdr);
 						
 						this.endOfCdRecord.update(0, 
 												  cdr.getLength() - record.getLength(),
@@ -257,7 +279,7 @@ public class ZipReader extends ByteBlock implements ArchiverI{
 
 
 	private byte[] createNewBody() {
-		byte[] newBody = new byte[sizeOfArchiveInBytes()];
+		byte[] newBody = new byte[length()];
 		byte[] buffer;
 		
 		int counter = 0;
@@ -270,7 +292,7 @@ public class ZipReader extends ByteBlock implements ArchiverI{
 		int offsetCounter = 0;
 		CentralDirectoryRecord record;
 		for (CentralDirectoryRecord cdr : listOfCdEntries) {
-			record = new CentralDirectoryRecord(cdr.toByteArray());
+			record = new CentralDirectoryRecord(cdr.toByteArray(), cdr.getHashObject());
 			record.setLocalFileHeaderOffset(offsetCounter);
 			offsetCounter += cdr.getLocalFileRecord().getLength();
 			System.arraycopy(record.toByteArray(), 0, newBody, counter, record.getLength());
