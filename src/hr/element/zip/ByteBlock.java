@@ -10,36 +10,36 @@ import java.util.Arrays;
 public class ByteBlock {
 	
 	protected byte[] body;
-	private int index;
+//	private int index;
 	protected int offset;
-	private int length;
+//	private int length;
 	
 	protected ByteBlock() {
 		body = null;
-		index = 0;
+//		index = 0;
 		offset = 0;
-		length = 0;
+//		length = 0;
 	}
 	
 	protected ByteBlock(byte[] body){
 		this.body = body;
-		index = 0;
+//		index = 0;
 		offset = 0;
-		length = body.length;
+//		length = body.length;
 	}
 	
 	protected ByteBlock(byte[] body, int offset){
 		this.body = body;
-		index = 0;
+//		index = 0;
 		this.offset = offset;
-		length = body.length;
+//		length = body.length;
 	}
 	
 	protected ByteBlock(byte[] body, int index, int offset, int length) {
 		this.body = body;
-		this.index = index;
+//		this.index = index;
 		this.offset = offset;
-		this.length = length;
+//		this.length = length;
 	}
 	
 	public void setBody(byte[] body) {
@@ -66,7 +66,7 @@ public class ByteBlock {
 	
 	
 	public int readIntLittleEndian(int off){	
-	      return ((body[off] & 0xff) | (body[off+1] & 0xff) << 8) | ((body[off+2] & 0xff) | (body[off+3] & 0xff) << 8) << 16;
+	      return (int)( ((body[off] & 0xff) | (body[off+1] & 0xff) << 8) | ((body[off+2] & 0xff) | (body[off+3] & 0xff) << 8) << 16);
 	}
 	
 	public long readLongLittleEndian(int off){
@@ -161,7 +161,7 @@ public class ByteBlock {
 	
 	protected int getInt(final int index) throws IllegalArgumentException {
 	    if (index >= body.length - 3) throw new IllegalArgumentException();
-	    return readIntLittleEndian(offset + index);
+	    return (readIntLittleEndian(offset + index));
 	}
 	
 	protected void setInt(final int index, final int value) throws IllegalArgumentException {

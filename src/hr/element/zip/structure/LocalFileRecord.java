@@ -18,34 +18,73 @@ public class LocalFileRecord extends ByteBlock {
 	  private final int OFF_CompressedData()  { return  OFF_ExtraField() + getExtraFieldLength(); }
 	  // END OFFSETS
 	
+	  //zbog descriptora moram imati ove varijable
+	  private int CRC32;
+	  private int compressedLen;
+	  private int unCompressedLen;
+	  
+	  private boolean descriptorExists = false;
 	 
 	
 	  
-	  public LocalFileRecord(final byte[] body){
-		  super(body);
+//	  public LocalFileRecord(final byte[] body){
+//		  super(body);
+//	  }
+	  
+//	  public LocalFileRecord(final byte[] body, final int offset) {
+//	    super(body, offset);
+//	  }
+	  
+	  public LocalFileRecord(final byte[] body,final int offset, final int compressedSize) {
+		    super(body, offset);
+		    
+		    
+		    if(getInt(OFF_CRC32)== 0 && getInt(OFF_UnCompressedData_Length) == 0 && getInt(OFF_CompressedData_Length) == 0){
+		    	//postoji data descriptor
+
+		    	descriptorExists = true;
+		    	for (int i = offset + OFF_CompressedData() + compressedSize; i < body.length; i++) {
+					if(i+15 < body.length && isDescriptor(i)){
+						this.CRC32 = getInt(i+4);
+						this.compressedLen = getInt(i+8);
+						this.unCompressedLen = getInt(i+12);
+						break;
+					}
+				}
+		    	
+		    } else {
+		    	this.CRC32 = getInt(OFF_CRC32);
+		    	this.compressedLen = getInt(OFF_CompressedData_Length);
+		    	this.unCompressedLen = getInt(OFF_UnCompressedData_Length); 
+		    }
 	  }
 	  
-	  public LocalFileRecord(final byte[] body, final int offset) {
-	    super(body, offset);
+	  
+	  
+	  private boolean isDescriptor(int pos) {
+			return body[pos + 0] == 0x50 && body[pos + 1] == 0x4b && body[pos + 2] == 0x7 && body[pos + 3] == 0x8 ;
+
 	  }
-	  
-	//****************************************************************//
-	  
+		//****************************************************************//
+
 	  
 	  private int getCompressedMethod() {			//8
 		    return getShort(OFF_CompressionMethod);
 	  }
 	  
 	  private int getCRC32() {						//14
-		    return getInt(OFF_CRC32);
+//		    return getInt(OFF_CRC32);
+		  return this.CRC32;
 	  }
 	  
 	  private int getCompressedDataLength() {		//18
-		    return getInt(OFF_CompressedData_Length);
+//		    return getInt(OFF_CompressedData_Length);
+		  return this.compressedLen;
 	  }
 	  
 	  private int getUnCompressedDataLength() {		//22
-		    return getInt(OFF_UnCompressedData_Length);
+//		    return getInt(OFF_UnCompressedData_Length);
+		  return this.unCompressedLen;
 	  }
 	  
 	  private int getFileNameLength() {				//26
@@ -61,6 +100,9 @@ public class LocalFileRecord extends ByteBlock {
 	   * @return length of header of local record
 	   */
 	  public int getOnlyHeaderLength() {
+		  if(descriptorExists){
+			    return 30 + getFileNameLength() + getExtraFieldLength() + 16;
+		  }
 	    return 30 + getFileNameLength() + getExtraFieldLength();
 	  }
 	

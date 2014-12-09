@@ -45,6 +45,10 @@ public class EndOfCentralDirectory extends ByteBlock{
 	}
 	
 	//velicina CD-a ne ukljucuje EndOfCd
+	/**
+	 * Returns length of central directory without End Of Central Directory
+	 * @return
+	 */
 	public int getCentralDirectoryLength() {
 		    return getInt(OFF_CentralDirectory_Size);
 	}
@@ -55,6 +59,10 @@ public class EndOfCentralDirectory extends ByteBlock{
 	}
 
 
+	/**
+	 * Length of ENDofCentralDirectory (22+ commentLength)
+	 * @return
+	 */
 	public int getLength() {
 		    return 22 + getCommentLength();	//velicina bez komentara je 22 
 	}

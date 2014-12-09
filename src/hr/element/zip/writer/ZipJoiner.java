@@ -53,7 +53,9 @@ public class ZipJoiner extends ByteBlock{
 				cdr2 = list2.get(j);
 				if(cdr1.getCRC32() == cdr2.getCRC32()) {
 					if( cdr1.compareSha(cdr2)){	//sada se gledaju velicine ako im je crc i sha isti
-						if( (cdr1.getLength()+cdr1.getLocalFileRecord().getLength()) > (cdr2.getLength()+cdr2.getLocalFileRecord().getLength())  ){
+//						if( (cdr1.getLength()+cdr1.getLocalFileRecord().getLength()) > (cdr2.getLength()+cdr2.getLocalFileRecord().getLength())  ){
+						if( (cdr1.getCompressedSize()) > (cdr2.getCompressedSize())  ){
+
 							listOfCdEntries.add(cdr2);
 						} else {
 							listOfCdEntries.add(cdr1);
