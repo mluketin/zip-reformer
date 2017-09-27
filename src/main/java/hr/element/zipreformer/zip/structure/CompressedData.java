@@ -1,4 +1,4 @@
-package hr.element.zip.structure;
+package hr.element.zipreformer.zip.structure;
 
 
 

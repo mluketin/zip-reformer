@@ -1,5 +1,5 @@
-package hr.element.zip.structure;
-import hr.element.zip.ByteBlock;
+package hr.element.zipreformer.zip.structure;
+import hr.element.zipreformer.zip.ByteBlock;
 
 
 public class LocalFileRecord extends ByteBlock {

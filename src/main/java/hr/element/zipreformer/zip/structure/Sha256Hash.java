@@ -1,4 +1,4 @@
-package hr.element.zip.structure;
+package hr.element.zipreformer.zip.structure;
 
 import java.io.IOException;
 import java.security.MessageDigest;
