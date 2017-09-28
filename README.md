@@ -12,9 +12,9 @@ One example of usage as seen in ZipReaderTest:
 
 This image shows zip1 and zip2:
 
-![alt text](https://github.com/mluketin/zip-reformer/master/assets/Zip1_Zip2.png)
+![alt text](https://github.com/mluketin/zip-reformer/blob/master/assets/Zip1_Zip2.png)
 
 And this image shows zip that is created from them:
 
-![alt text](https://github.com/mluketin/zip-reformer/master/assets/Zip3.png)
+![alt text](https://github.com/mluketin/zip-reformer/blob/master/assets/Zip3.png)
 
