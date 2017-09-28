@@ -7,7 +7,6 @@ import java.security.NoSuchAlgorithmException;
 public class Sha256Hash {
 	
 	private byte[] hash;
-
 	
 	public Sha256Hash(byte[] input) throws NoSuchAlgorithmException{
 		MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
@@ -19,14 +18,6 @@ public class Sha256Hash {
 		return hash;
 	}
 
-
-	/**
-	 * usporedi SHA sa SHA od cdr-a
-	 * @param cdr
-	 * @return
-	 * @throws NoSuchAlgorithmException
-	 * @throws IOException
-	 */
 	public boolean compareSha(CentralDirectoryRecord cdr) throws NoSuchAlgorithmException, IOException{
 		
 		byte[] cdrHash = cdr.getHash();
@@ -38,6 +29,5 @@ public class Sha256Hash {
 		}
 		return true;
 	}
-
 
 }

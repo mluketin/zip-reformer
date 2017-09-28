@@ -15,20 +15,17 @@ public class ZipJoiner extends ByteBlock{
 	private EndOfCentralDirectory endOfCdRecord;
 	private List<CentralDirectoryRecord> listOfCdEntries;
 
-	
 	public ZipJoiner(ZipReader zp1, ZipReader zp2) throws IOException, NoSuchAlgorithmException {
 		List<CentralDirectoryRecord> list1 = new ArrayList<>();
 		list1.addAll(zp1.getListOfCdEntries());
 
 		List<CentralDirectoryRecord> list2 = new ArrayList<>(); 
 		list2.addAll(zp2.getListOfCdEntries());
-
 		
 		this.listOfCdEntries = getJointList(list1, list2);
 		this.endOfCdRecord = new EndOfCentralDirectory();
 		updateEndOfCdRecord();		
 	}
-	
 
 	public EndOfCentralDirectory getEndOfCdRecord() {
 		return endOfCdRecord;
@@ -37,7 +34,6 @@ public class ZipJoiner extends ByteBlock{
 	public List<CentralDirectoryRecord> getListOfCdEntries() {
 		return listOfCdEntries;
 	}
-
 
 	private List<CentralDirectoryRecord> getJointList(List<CentralDirectoryRecord> list1, List<CentralDirectoryRecord> list2) throws NoSuchAlgorithmException, IOException {
 	

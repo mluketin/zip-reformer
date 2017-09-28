@@ -50,8 +50,6 @@ public class ByteBlock {
 		return body;
 	}
 
-	
-	
 	public void setOffset(int offset) {
 		this.offset = offset;
 	}
